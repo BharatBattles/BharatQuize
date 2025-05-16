@@ -1,0 +1,593 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bharat Quizzes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/197/197419.png" type="image/png">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>Bharat Quizzes</h1>
+        </div>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="quiz.html"><i class="fas fa-question-circle"></i> Take Quiz</a>
+            <a href="certificate.html"><i class="fas fa-certificate"></i> Certificate</a>
+            <a href="add-quiz.html"><i class="fas fa-plus-circle"></i> Add Quiz</a>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Welcome to Bharat Quizzes!</h2>
+            <p>Test your knowledge about India with our fun quizzes. Add your own questions, complete the quiz, and earn a certificate!</p>
+            <a href="quiz.html" class="btn"><i class="fas fa-play"></i> Start Quiz</a>
+            <a href="add-quiz.html" class="btn"><i class="fas fa-plus"></i> Add New Quiz</a>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 Bharat Quizzes. All rights reserved.</p>
+    </footer>
+</body>
+</html>
+
+<!-- quiz.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Bharat Quizzes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/197/197419.png" type="image/png">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>Bharat Quizzes</h1>
+        </div>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="quiz.html"><i class="fas fa-question-circle"></i> Take Quiz</a>
+            <a href="certificate.html"><i class="fas fa-certificate"></i> Certificate</a>
+            <a href="add-quiz.html"><i class="fas fa-plus-circle"></i> Add Quiz</a>
+        </nav>
+    </header>
+    <main>
+        <section id="quiz">
+            <h2>India Knowledge Quiz</h2>
+            <button onclick="clearQuizzes()" class="btn clear-btn"><i class="fas fa-trash"></i> Clear Added Quizzes</button>
+            <div id="quiz-container"></div>
+            <button id="submit-quiz" onclick="submitQuiz()"><i class="fas fa-check"></i> Submit Quiz</button>
+            <div id="result"></div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 Bharat Quizzes. All rights reserved.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
+
+<!-- certificate.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate - Bharat Quizzes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/197/197419.png" type="image/png">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>Bharat Quizzes</h1>
+        </div>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="quiz.html"><i class="fas fa-question-circle"></i> Take Quiz</a>
+            <a href="certificate.html"><i class="fas fa-certificate"></i> Certificate</a>
+            <a href="add-quiz.html"><i class="fas fa-plus-circle"></i> Add Quiz</a>
+        </nav>
+    </header>
+    <main>
+        <section class="certificate-section">
+            <h2>Generate Your Certificate</h2>
+            <p>Enter your name to generate a certificate for completing the quiz.</p>
+            <input type="text" id="user-name" placeholder="Enter your name">
+            <button onclick="generateCertificate()"><i class="fas fa-download"></i> Generate Certificate</button>
+            <div id="certificate-link"></div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 Bharat Quizzes. All rights reserved.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
+
+<!-- add-quiz.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Quiz - Bharat Quizzes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/197/197419.png" type="image/png">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <h1>Bharat Quizzes</h1>
+        </div>
+        <nav>
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="quiz.html"><i class="fas fa-question-circle"></i> Take Quiz</a>
+            <a href="certificate.html"><i class="fas fa-certificate"></i> Certificate</a>
+            <a href="add-quiz.html"><i class="fas fa-plus-circle"></i> Add Quiz</a>
+        </nav>
+    </header>
+    <main>
+        <section class="add-quiz-section">
+            <h2>Add a New Quiz Question</h2>
+            <p>Fill in the details to add a new question to the quiz.</p>
+            <form id="add-quiz-form">
+                <label for="question"><i class="fas fa-question"></i> Question:</label>
+                <input type="text" id="question" placeholder="Enter the question" required>
+                <label for="option1"><i class="fas fa-dot-circle"></i> Option 1:</label>
+                <input type="text" id="option1" placeholder="Enter option 1" required>
+                <label for="option2"><i class="fas fa-dot-circle"></i> Option 2:</label>
+                <input type="text" id="option2" placeholder="Enter option 2" required>
+                <label for="option3"><i class="fas fa-dot-circle"></i> Option 3:</label>
+                <input type="text" id="option3" placeholder="Enter option 3" required>
+                <label for="option4"><i class="fas fa-dot-circle"></i> Option 4:</label>
+                <input type="text" id="option4" placeholder="Enter option 4" required>
+                <label for="answer"><i class="fas fa-check-circle"></i> Correct Answer:</label>
+                <select id="answer" required>
+                    <option value="" disabled selected>Select the correct answer</option>
+                    <option value="1">Option 1</option>
+                    <option value="2">Option 2</option>
+                    <option value="3">Option 3</option>
+                    <option value="4">Option 4</option>
+                </select>
+                <button type="submit"><i class="fas fa-plus"></i> Add Question</button>
+            </form>
+            <div id="form-message"></div>
+        </section>
+    </main>
+    <footer>
+        <p>© 2025 Bharat Quizzes. All rights reserved.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
+
+<!-- styles.css -->
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    line-height: 1.6;
+    color: #333;
+    background: linear-gradient(135deg, #ff9933, #ffffff, #138808);
+    background-attachment: fixed;
+}
+
+header {
+    background: #ff9933;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.logo i {
+    font-size: 1.5rem;
+}
+
+header h1 {
+    margin-bottom: 0.5rem;
+}
+
+nav a {
+    color: white;
+    margin: 0 1rem;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a i {
+    margin-right: 0.3rem;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 2rem;
+}
+
+section {
+    margin-bottom: 2rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #138808;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.btn i {
+    margin-right: 0.3rem;
+}
+
+.btn:hover {
+    background: #0f6b06;
+}
+
+.clear-btn {
+    background: #ff3333;
+}
+
+.clear-btn:hover {
+    background: #cc0000;
+}
+
+#quiz-container {
+    margin: 1rem 0;
+}
+
+#quiz-container div {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
+
+#quiz-container label {
+    margin-left: 0.5rem;
+}
+
+#quiz-container input {
+    margin-right: 0.5rem;
+}
+
+#submit-quiz {
+    padding: 0.5rem 1rem;
+    background: #138808;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor veggie: pointer;
+    transition: background 0.3s;
+}
+
+#submit-quiz i {
+    margin-right: 0.3rem;
+}
+
+#submit-quiz:hover {
+    background: #0f6b06;
+}
+
+#result {
+    margin-top: 1rem;
+    font-weight: bold;
+    padding: 1rem;
+    background: #e0f7e0;
+    border-radius: 5px;
+}
+
+input[type="text"], select {
+    padding: 0.5rem;
+    margin: 0.5rem 0;
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 0.5rem 1rem;
+    background: #138808;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button i {
+    margin-right: 0.3rem;
+}
+
+button:hover {
+    background: #0f6b06;
+}
+
+.certificate-section, .add-quiz-section {
+    text-align: center;
+    border: 2px solid #ff9933;
+    padding: 2rem;
+    border-radius: 10px;
+    background: #fff;
+    position: relative;
+}
+
+.certificate-section::before, .add-quiz-section::before {
+    content: "\f559";
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    color: #138808;
+    background: #fff;
+    padding: 0 10px;
+}
+
+#certificate-link a, .add-quiz-section a {
+    color: #138808;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+#certificate-link a:hover, .add-quiz-section a:hover {
+    text-decoration: underline;
+}
+
+.add-quiz-section label {
+    display: block;
+    text-align: left;
+    margin: 0.5rem 0 0.2rem;
+}
+
+.add-quiz-section label i {
+    margin-right: 0.3rem;
+}
+
+#form-message {
+    margin-top: 1rem;
+    font-weight: bold;
+    color: #138808;
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    background: #333;
+    color: white;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+<!-- script.js -->
+const quizData = [
+    {
+        question: "What is the capital of India?",
+        options: ["Mumbai", "Delhi", "Kolkata", "Chennai"],
+        answer: "Delhi"
+    },
+    {
+        question: "Which river is considered the holiest in India?",
+        options: ["Yamuna", "Ganges", "Brahmaputra", "Godavari"],
+        answer: "Ganges"
+    },
+    {
+        question: "Who is known as the Father of the Nation in India?",
+        options: ["Jawaharlal Nehru", "Subhas Chandra Bose", "Mahatma Gandhi", "Sardar Patel"],
+        answer: "Mahatma Gandhi"
+    },
+    {
+        question: "What is the national animal of India?",
+        options: ["Lion", "Elephant", "Tiger", "Peacock"],
+        answer: "Tiger"
+    },
+    {
+        question: "Which festival is known as the Festival of Lights?",
+        options: ["Holi", "Diwali", "Raksha Bandhan", "Eid"],
+        answer: "Diwali"
+    }
+];
+
+function loadQuiz() {
+    const quizContainer = document.getElementById('quiz-container');
+    let allQuizzes = [...quizData];
+    const storedQuizzes = JSON.parse(localStorage.getItem('userQuizzes')) || [];
+    allQuizzes = allQuizzes.concat(storedQuizzes);
+    
+    allQuizzes.forEach((q, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.innerHTML = `
+            <p><i class="fas fa-question"></i> ${index + 1}. ${q.question}</p>
+            ${q.options.map(option => `
+                <input type="radio" name="question${index}" value="${option}">
+                <label>${option}</label><br>
+            `).join('')}
+        `;
+        quizContainer.appendChild(questionDiv);
+    });
+}
+
+function submitQuiz() {
+    let score = 0;
+    let allQuizzes = [...quizData];
+    const storedQuizzes = JSON.parse(localStorage.getItem('userQuizzes')) || [];
+    allQuizzes = allQuizzes.concat(storedQuizzes);
+    
+    allQuizzes.forEach((q, index) => {
+        const selected = document.querySelector(`input[name="question${index}"]:checked`);
+        if (selected && selected.value === q.answer) {
+            score++;
+        }
+    });
+    const resultDiv = document.getElementById('result');
+    resultDiv.innerHTML = `You scored ${score} out of ${allQuizzes.length}! ${score >= Math.ceil(allQuizzes.length * 0.6) ? 'Great job! <a href="certificate.html">Get your certificate</a>' : 'Try again!'}`;
+}
+
+function generateCertificate() {
+    const name = document.getElementById('user-name').value.trim();
+    if (!name) {
+        alert('Please enter your name!');
+        return;
+    }
+    const certificateHTML = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Certificate - Bharat Quizzes</title>
+            <style>
+                body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; background: #f4f4f4; }
+                .certificate { max-width: 800px; margin: auto; border: 5px double #ff9933; padding: 2rem; background: white; border-radius: 10px; }
+                .certificate h1 { color: #138808; }
+                .certificate p { font-size: 1.2rem; margin: 1rem 0; }
+                .badge { font-size: 3rem; color: #ff9933; margin: 1rem 0; }
+            </style>
+        </head>
+        <body>
+            <div class="certificate">
+                <h1>Certificate of Achievement</h1>
+                <p>This is to certify that</p>
+                <h2>${name}</h2>
+                <p>has successfully completed the India Knowledge Quiz at Bharat Quizzes.</p>
+                <p>Date: ${new Date().toLocaleDateString()}</p>
+                <div class="badge">🏆</div>
+            </div>
+        </body>
+        </html>
+    `;
+    const blob = new Blob([certificateHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'certificate.html';
+    link.textContent = 'Download Your Certificate';
+    const linkDiv = document.getElementById('certificate-link');
+    linkDiv.innerHTML = '';
+    linkDiv.appendChild(link);
+}
+
+function addQuiz() {
+    const form = document.getElementById('add-quiz-form');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const question = document.getElementById('question').value.trim();
+            const option1 = document.getElementById('option1').value.trim();
+            const option2 = document.getElementById('option2').value.trim();
+            const option3 = document.getElementById('option3').value.trim();
+            const option4 = document.getElementById('option4').value.trim();
+            const answerIndex = document.getElementById('answer').value;
+            
+            if (!question || !option1 || !option2 || !option3 || !option4 || !answerIndex) {
+                document.getElementById('form-message').textContent = 'Please fill all fields!';
+                return;
+            }
+            
+            const options = [option1, option2, option3, option4];
+            const answer = options[parseInt(answerIndex) - 1];
+            
+            const newQuiz = { question, options, answer };
+            let storedQuizzes = JSON.parse(localStorage.getItem('userQuizzes')) || [];
+            storedQuizzes.push(newQuiz);
+            localStorage.setItem('userQuizzes', JSON.stringify(storedQuizzes));
+            
+            document.getElementById('form-message').textContent = 'Question added successfully! Go to the quiz page to see it.';
+            form.reset();
+        });
+    }
+}
+
+function clearQuizzes() {
+    localStorage.removeItem('userQuizzes');
+    document.getElementById('quiz-container').innerHTML = '';
+    document.getElementById('result').innerHTML = '';
+    loadQuiz();
+    alert('Added quizzes cleared!');
+}
+
+if (document.getElementById('quiz-container')) {
+    loadQuiz();
+}
+
+if (document.getElementById('add-quiz-form')) {
+    addQuiz();
+}
